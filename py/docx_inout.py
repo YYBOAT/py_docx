@@ -78,6 +78,13 @@ def find_str_in_table(document,str,offset=0):  #找到要复制行的位置 如�
    i+=1
    return table,-1    #找不复制行位置,return
 
+def find_str_in_document(document,str): #找行
+   index=0
+   for para in document.paragraphs: 
+      if str in para.text:
+         return index
+      index+=1 
+   return -1
 
 def build_new_table_rows( table_row_copy,line_num ):  #构建line_num数量新行 可能需要手动加入一些元素
     table_rows=[] #list
@@ -123,10 +130,21 @@ def replace_str_in_cells(cell,str):
    cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER #居中
    cell.paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER #居中
 
+def document_delete_row(root,file_name,str="this_default_str_is_long_enough_to_make_sure_it_can_not_be_found",index=-1,offset=0):  #删除指定行,用index直接制定位置或者招str，offset为偏移量正数往下偏移
+   document=Document(root+'\\'+file_name)
+   if(index<0):
+      index=find_str_in_document(document,str)-offset 
+   
+   para_element=document.paragraphs[index]._element
+   para_element.getparent().remove(para_element)
+   document.save(root+'\\'+file_name)
+
+
+
 def document_delete_table(root,file_name,tableindex):  #删除指定表格
    document=Document(root+'\\'+file_name)
-   table=document.tables[tableindex-1]   #注意数组下表以0开始
-   table._element.getparent().remove(table._element)
+   table_element=document.tables[tableindex-1]._element   #注意数组下表以0开始
+   table_element.getparent().remove(table_element)
    document.save(root+'\\'+file_name)
 
 
@@ -138,12 +156,13 @@ for root,dirs,files in os.walk('E:\\codeproiect\\py_docx\\报告模板'):
       if file.endswith('.docx') and not file.startswith( '.$'):
          print(file)
          #document_table_addrow(root,file,list1)
-         document_delete_table(root,file,3)
+         #document_delete_table(root,file,3)
+         document_delete_row(root,file,"检测结论",offset=1)
 
 #document_table_addrow('E:\\codeproiect\\py_docx','CF2024(1×25 1kV).docx',list1)
 
 #document_delete_table('E:\\codeproiect\\py_docx','CF2024(1×25 1kV).docx',3)
- 
+#document_delete_row('E:\\codeproiect\\py_docx','CF2024(1×25 1kV).docx',"检测结论",offset=1)
 
 #print(str('{:.2f}'.format(random.uniform(69,71))))
 
